@@ -103,6 +103,14 @@ const UIController = (() =>{
 
         },
 
+        clearFields: () => {
+            let fields,fieldsArray;            
+            fields = document.querySelectorAll(selectors.inputDescription + ', ' + selectors.inputValue);
+            fieldsArray = Array.prototype.slice.call(fields);            
+            fieldsArray.forEach(current => current.value="");
+            fieldsArray[0].focus();
+        },
+
         getSelectors: () => selectors
     };
 
@@ -135,8 +143,9 @@ const controller = ((budgetCtrl, UICtrl) =>{
 
         //3. Add the item to the UI
         UICtrl.addListItem(newItem, input.type);
-
         
+        //4. Clear the input fields
+        UIController.clearFields();
     };
 
     return{
