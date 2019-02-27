@@ -1,8 +1,9 @@
 /*
     Module pattern because we want encapsulation and separation of concerns
+    We do that by implementing so called IIFE's.
 */
 
-//Budget Controller
+//Budget Controller IIFE
 const budgetController = (() => {
 
     let Expense = function(id, description, value){
@@ -76,7 +77,7 @@ const UIController = (() =>{
             return{
                 type: document.querySelector(selectors.inputType).value, //Either inc or exp
                 description: document.querySelector(selectors.inputDescription).value,
-                value: document.querySelector(selectors.inputValue).value
+                value: parseFloat(document.querySelector(selectors.inputValue).value)
             };            
         },
 
@@ -130,22 +131,35 @@ const controller = ((budgetCtrl, UICtrl) =>{
             });
     };
 
-    
+    const updateBudget = () =>{
 
-    let ctrlAddItem = () =>{
+        //1. Calculate the budget
+
+        //2. return the budget
+
+    };
+
+    const ctrlAddItem = () =>{
         let input, newItem;
 
         //1. Get the field input data
         input = UICtrl.getInput();
      
-        //2. Add the item to the budget controller
-        newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+        if(input.description !== "" && !isNaN(input.value) && input.value > 0){        
 
-        //3. Add the item to the UI
-        UICtrl.addListItem(newItem, input.type);
-        
-        //4. Clear the input fields
-        UIController.clearFields();
+            //2. Add the item to the budget controller
+            newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+
+            //3. Add the item to the UI
+            UICtrl.addListItem(newItem, input.type);
+            
+            //4. Clear the input fields
+            UIController.clearFields();
+
+            //5. Calculate and update the budget
+            updateBudget();
+        }
+
     };
 
     return{
