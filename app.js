@@ -10,7 +10,7 @@ const budgetController = (() => {
 })();
 
 // UI Controller
-const UIController = (() =>{
+const UIController = (() => {
 
     //TODO
 
