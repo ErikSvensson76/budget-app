@@ -63,6 +63,25 @@ const budgetController = (() => {
             return newItem;
         },
 
+        deleteItem: (type, id) => { 
+            let index, idArray;         
+
+            /* Non ES6 way
+                let idArray = data.allItems[type].map(function(current){
+                    return current.id;
+                });
+            */                   
+
+            idArray = data.allItems[type].map(current => current.id);      
+
+            index = idArray.indexOf(id);              
+
+            if(index !== -1){
+                //index param is delete from position and 1 param is how many
+                data.allItems[type].splice(index, 1);
+            }
+        },
+
         calculateBudget: () =>{
 
             //Calculate total income and expenses
@@ -78,8 +97,6 @@ const budgetController = (() => {
             }else{
                 data.percentage = -1;
             }
-            
-
         },
 
         getBudget: () =>{
@@ -111,12 +128,12 @@ const UIController = (() =>{
         budgetLabel: '.budget__value',
         budgetIncomeValue: '.budget__income--value',
         budgetExpensesValue: '.budget__expenses--value',
-        budgetExpensesPercentage: '.budget__expenses--percentage'
+        budgetExpensesPercentage: '.budget__expenses--percentage',
+        container: '.container'
     };
 
     return{
-        getInput: () => {
-            
+        getInput: () => {            
             return{
                 type: document.querySelector(selectors.inputType).value, //Either inc or exp
                 description: document.querySelector(selectors.inputDescription).value,
@@ -130,10 +147,10 @@ const UIController = (() =>{
             //Create HTML string with placeholder text
             if(type === 'inc'){
                 element = selectors.incomeContainer;
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }else if(type ==='exp'){
                 element = selectors.expensesContainer;
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
 
             //Replace the placeholder text with actual data
@@ -141,10 +158,14 @@ const UIController = (() =>{
             newHtml = newHtml.replace('%description%', obj.description);
             newHtml = newHtml.replace('%value%', obj.value);
 
-
             //Insert the html into the DOM
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
 
+        },
+
+        deleteListItem: (selectorID) => {
+            let element = document.getElementById(selectorID);
+            element.parentNode.removeChild(element);
         },
 
         clearFields: () => {
@@ -179,10 +200,12 @@ const controller = ((budgetCtrl, UICtrl) =>{
             document.querySelector(selectors.inputBtn).addEventListener('click', ctrlAddItem);
 
             document.addEventListener('keypress', (event) => {            
-                if(event.keyCode === 13){
+                if(event.keyCode === 13 || event.which === 13){
                     ctrlAddItem();
                 }
             });
+
+            document.querySelector(selectors.container).addEventListener('click', ctrlDeleteItem);
     };
 
     const updateBudget = () =>{
@@ -218,7 +241,26 @@ const controller = ((budgetCtrl, UICtrl) =>{
             //5. Calculate and update the budget
             updateBudget();
         }
+    };
 
+    const ctrlDeleteItem = (event) => {
+        let itemID, splitID, type, ID;
+
+        itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+        if(itemID){
+            splitID = itemID.split('-');
+            type = splitID[0];
+            ID = parseInt(splitID[1]);
+            
+
+            //1. Delete item from data structure
+            budgetCtrl.deleteItem(type, ID);
+            //2. Delete item from UI
+            UICtrl.deleteListItem(itemID);
+            //3. Update and show the new budget
+            updateBudget();
+        }
     };
 
     return{
