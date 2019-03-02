@@ -10,6 +10,19 @@ const budgetController = (() => {
         this.id = id;
         this.description = description;
         this.value = value;
+        this.percentage = -1;
+    };
+
+    Expense.prototype.calcPercentage = function(totalIncome) {
+        if(totalIncome > 0){
+            this.percentage = Math.round((this.value / totalIncome) * 100);
+        } else{
+            this.percentage = -1;
+        }       
+    };
+
+    Expense.prototype.getPercentage = function(){
+        return this.percentage;
     };
 
     let Income = function(id, description, value){
@@ -108,6 +121,10 @@ const budgetController = (() => {
             };
         },
 
+        calculatePercentages: () => data.allItems.exp.forEach(current => current.calcPercentage(data.totals.inc)), 
+
+        getPercentages: () => data.allItems.exp.map(current => current.getPercentage()),
+
         //REMOVE THIS LATER :)
         testing: () => console.log(data)
 
@@ -129,7 +146,8 @@ const UIController = (() =>{
         budgetIncomeValue: '.budget__income--value',
         budgetExpensesValue: '.budget__expenses--value',
         budgetExpensesPercentage: '.budget__expenses--percentage',
-        container: '.container'
+        container: '.container',
+        itemPercentageLabel: '.item__percentage'
     };
 
     return{
@@ -187,6 +205,22 @@ const UIController = (() =>{
             }
         },
 
+        displayPercentages: (percentages) =>{
+            //const fields will be a node list
+            let fields = document.querySelectorAll(selectors.itemPercentageLabel);
+
+            const nodeListForEach = (list, callback) =>{
+                for(let i=0; i<list.length; i++){
+                    callback(list[i], i);
+                }
+            };
+
+            nodeListForEach(fields, (current, index) => {
+                current.textContent = percentages[index] > 0 ? percentages[index] + '%' : '---';
+            });
+
+        },
+
         getSelectors: () => selectors
     };
 
@@ -221,6 +255,19 @@ const controller = ((budgetCtrl, UICtrl) =>{
 
     };
 
+    const updatePercentages = () => {
+
+        //1. Calculate percentages
+        budgetCtrl.calculatePercentages();
+
+        //2. Read percentages from the budget controller
+        const percentages = budgetCtrl.getPercentages();
+
+        //3. Update the UI with the new percentages
+        UICtrl.displayPercentages(percentages);
+
+    };
+
     const ctrlAddItem = () =>{
         let input, newItem;
 
@@ -240,6 +287,9 @@ const controller = ((budgetCtrl, UICtrl) =>{
 
             //5. Calculate and update the budget
             updateBudget();
+
+            //6. Calculate and update the percentages
+            updatePercentages();
         }
     };
 
@@ -260,6 +310,8 @@ const controller = ((budgetCtrl, UICtrl) =>{
             UICtrl.deleteListItem(itemID);
             //3. Update and show the new budget
             updateBudget();
+            //6. Calculate and update the percentages
+            updatePercentages();
         }
     };
 
