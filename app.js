@@ -147,7 +147,41 @@ const UIController = (() =>{
         budgetExpensesValue: '.budget__expenses--value',
         budgetExpensesPercentage: '.budget__expenses--percentage',
         container: '.container',
-        itemPercentageLabel: '.item__percentage'
+        itemPercentageLabel: '.item__percentage',
+        dateLabel: '.budget__title--month'
+    };
+
+    const formatNumber =  (num, type) =>{
+        let numSplit, integerPart, decimalPart;
+
+        /*
+            + or - before number
+            2 decimals
+            comma separating the thousands
+
+            2345.3421 -> + 2,345.34
+            2000 -> + 2,000.00
+        */
+
+        //Math.abs return a positive number
+        num = Math.abs(num);
+        //Always put 2 decimal numbers also converts it to string
+        num = num.toFixed(2);
+
+        numSplit = num.split('.');
+
+        integerPart = numSplit[0];
+
+        //If it has more than 3 numbers its a thousand or more
+        if(integerPart.length > 3){
+            integerPart = integerPart.substr(0,integerPart.length -3) + ',' + integerPart.substr(integerPart.length - 3, 3);
+            //input 23510, output 23,510
+        }
+
+        decimalPart = numSplit[1];      
+
+        return (type === 'exp' ? '-' :  '+') + ' ' + integerPart + '.' + decimalPart;
+
     };
 
     return{
@@ -174,7 +208,7 @@ const UIController = (() =>{
             //Replace the placeholder text with actual data
             newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.description);
-            newHtml = newHtml.replace('%value%', obj.value);
+            newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
 
             //Insert the html into the DOM
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
@@ -195,9 +229,11 @@ const UIController = (() =>{
         },
 
         displayBudget: (obj) => {
-            document.querySelector(selectors.budgetLabel).textContent = obj.budget;
-            document.querySelector(selectors.budgetIncomeValue).textContent = obj.totalIncome;
-            document.querySelector(selectors.budgetExpensesValue).textContent = obj.totalExpenses;
+            const type = obj.budget > 0 ? 'inc' : 'exp';
+
+            document.querySelector(selectors.budgetLabel).textContent = formatNumber(obj.budget, type);
+            document.querySelector(selectors.budgetIncomeValue).textContent = formatNumber(obj.totalIncome, 'inc');
+            document.querySelector(selectors.budgetExpensesValue).textContent = formatNumber(obj.totalExpenses, 'exp');
             if(obj.percentage > 0){
                 document.querySelector(selectors.budgetExpensesPercentage).textContent = obj.percentage + '%';
             }else{
@@ -219,6 +255,15 @@ const UIController = (() =>{
                 current.textContent = percentages[index] > 0 ? percentages[index] + '%' : '---';
             });
 
+        },
+        
+        displayMonth: () =>{
+            let now, months;
+            now = new Date();
+            
+            months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            document.querySelector(selectors.dateLabel).textContent = months[now.getMonth()] + ' ' + now.getFullYear();
         },
 
         getSelectors: () => selectors
@@ -318,7 +363,8 @@ const controller = ((budgetCtrl, UICtrl) =>{
     return{
         init: () => {
             console.log('Application has started');
-            UICtrl.displayBudget({
+            UICtrl.displayMonth();
+            UICtrl.displayBudget({                
                 budget : 0,
                 totalIncome: 0,
                 totalExpenses: 0,
