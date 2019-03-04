@@ -48,9 +48,7 @@ const budgetController = (() => {
         },
         budget: 0,
         percentage: -1
-    };
-
-   
+    };   
 
     return {
         addItem: (type, description, value) => {
@@ -61,8 +59,7 @@ const budgetController = (() => {
                 id = data.allItems[type][data.allItems[type].length - 1].id + 1;
             }else{
                 id = 0;
-            }
-            
+            }            
 
             if(type === 'exp'){
                 newItem = new Expense(id, description, value);
@@ -123,11 +120,8 @@ const budgetController = (() => {
 
         calculatePercentages: () => data.allItems.exp.forEach(current => current.calcPercentage(data.totals.inc)), 
 
-        getPercentages: () => data.allItems.exp.map(current => current.getPercentage()),
-
-        //REMOVE THIS LATER :)
-        testing: () => console.log(data)
-
+        getPercentages: () => data.allItems.exp.map(current => current.getPercentage())
+        
     };
 
 })();
@@ -178,10 +172,8 @@ const UIController = (() =>{
             //input 23510, output 23,510
         }
 
-        decimalPart = numSplit[1];      
-
+        decimalPart = numSplit[1];
         return (type === 'exp' ? '-' :  '+') + ' ' + integerPart + '.' + decimalPart;
-
     };
 
     const nodeListForEach = (list, callback) =>{
@@ -218,7 +210,6 @@ const UIController = (() =>{
 
             //Insert the html into the DOM
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
-
         },
 
         deleteListItem: (selectorID) => {
@@ -254,15 +245,12 @@ const UIController = (() =>{
             nodeListForEach(fields, (current, index) => {
                 current.textContent = percentages[index] > 0 ? percentages[index] + '%' : '---';
             });
-
         },
         
         displayMonth: () =>{
             let now, months;
-            now = new Date();
-            
+            now = new Date();            
             months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
             document.querySelector(selectors.dateLabel).textContent = months[now.getMonth()] + ' ' + now.getFullYear();
         },
 
@@ -299,10 +287,7 @@ const controller = ((budgetCtrl, UICtrl) =>{
             });
 
             document.querySelector(selectors.container).addEventListener('click', ctrlDeleteItem);
-
             document.querySelector(selectors.inputType).addEventListener('change', UICtrl.changedType);
-
-
     };
 
     const updateBudget = () =>{
@@ -390,11 +375,8 @@ const controller = ((budgetCtrl, UICtrl) =>{
             });
             setupEventListeners();
         }
-    };
-
-    
+    };    
 
 })(budgetController, UIController); 
 
 controller.init();
-
