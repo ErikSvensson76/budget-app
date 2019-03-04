@@ -184,6 +184,12 @@ const UIController = (() =>{
 
     };
 
+    const nodeListForEach = (list, callback) =>{
+        for(let i=0; i<list.length; i++){
+            callback(list[i], i);
+        }
+    };
+
     return{
         getInput: () => {            
             return{
@@ -243,13 +249,7 @@ const UIController = (() =>{
 
         displayPercentages: (percentages) =>{
             //const fields will be a node list
-            let fields = document.querySelectorAll(selectors.itemPercentageLabel);
-
-            const nodeListForEach = (list, callback) =>{
-                for(let i=0; i<list.length; i++){
-                    callback(list[i], i);
-                }
-            };
+            let fields = document.querySelectorAll(selectors.itemPercentageLabel);            
 
             nodeListForEach(fields, (current, index) => {
                 current.textContent = percentages[index] > 0 ? percentages[index] + '%' : '---';
@@ -264,6 +264,20 @@ const UIController = (() =>{
             months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
             document.querySelector(selectors.dateLabel).textContent = months[now.getMonth()] + ' ' + now.getFullYear();
+        },
+
+        changedType: () =>{
+            let fields = document.querySelectorAll(selectors.inputType +',' +
+                                                selectors.inputDescription +','+
+                                                selectors.inputValue
+            );
+            
+            nodeListForEach(fields, (current) =>{
+                current.classList.toggle('red-focus');
+            });
+
+            document.querySelector(selectors.inputBtn).classList.toggle('red');
+
         },
 
         getSelectors: () => selectors
@@ -285,6 +299,10 @@ const controller = ((budgetCtrl, UICtrl) =>{
             });
 
             document.querySelector(selectors.container).addEventListener('click', ctrlDeleteItem);
+
+            document.querySelector(selectors.inputType).addEventListener('change', UICtrl.changedType);
+
+
     };
 
     const updateBudget = () =>{
